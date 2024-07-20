@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB5A</title>
+    <style>
+        /* CSS стили для оформления */
+    </style>
+</head>
+<body>
+    <h3>First Task</h3>
+    <form id="calcForm">
+        <label for="x">X:</label>
+        <input type="text" id="x" name="x"><br><br>
+        <label for="y">Y:</label>
+        <input type="text" id="y" name="y"><br><br>
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="result1"></div>
+
+    <h3>Second Task</h3>
+        <form id="generateForm">
+            <label for="n">N:</label>
+            <input type="number" id="n" name="n" min="1" required><br><br>
+            <button type="submit">Generate</button>
+        </form>
+    <div id="result2"></div>
+    <h3>Third Task</h3>
+    <form id="formAB">
+        <input type="text" id="valueX" name="valueX" placeholder="Введите значение для X">
+        <br/>
+        <input type="text" id="valueY" name="valueY" placeholder="Введите значение для Y">
+        <br/>
+        <input type="text" id="valueN" name="valueN" placeholder="Введите значение для N">
+        <br/>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <div id="resultA"></div>
+    <div id="resultB"></div>
+<script>
+    document.getElementById('calcForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let x = document.getElementById('x').value;
+        let y = document.getElementById('y').value;
+        fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Value-x': x,
+                'X-Value-y': y
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response;
+            })
+            .then(response => response.headers.get('X-Value-z'))
+            .then(z => {
+                document.getElementById('result1').innerText = 'Z: ' + z;
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+    });
+    document.getElementById('generateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let n = document.getElementById('n').value;
+        fetch('/generateB', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Rand-N': n
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('result2').innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+    });
+
+    const formAB = document.getElementById('formAB');
+    const resultA = document.getElementById('resultA');
+    const resultB = document.getElementById('resultB');
+
+    formAB.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const x = document.getElementById('valueX').value;
+        const y = document.getElementById('valueY').value;
+        const n = document.getElementById('valueN').value;
+
+        const xhrA = new XMLHttpRequest();
+        xhrA.open('POST', '/calc', true);
+        xhrA.setRequestHeader('Content-Type', 'text/plain');
+        xhrA.setRequestHeader('x-value-x', x);
+        xhrA.setRequestHeader('x-value-y', y);
+
+        xhrA.onload = function() {
+            if (xhrA.status === 200) {
+                resultA.textContent = xhrA.getResponseHeader('x-value-z');
+            }
+        };
+
+        xhrA.send();
+
+        const xhrB = new XMLHttpRequest();
+        xhrB.open('POST', '/generateC', true);
+        xhrB.setRequestHeader('Content-Type', 'application/json');
+        xhrB.setRequestHeader('x-rand-n', n);
+
+        xhrB.onload = function() {
+            if (xhrB.status === 200) {
+                const dataB = JSON.parse(xhrB.responseText);
+                resultB.textContent = 'Результат задания B: ' + dataB.numbers;
+            }
+        };
+
+        xhrB.send();
+    });
+</script>
+</body>
+</html>
